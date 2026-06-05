@@ -201,6 +201,13 @@
     }
     /* Modal scroll on small screens */
     #shareModal > div { max-height: 92vh; overflow-y: auto; }
+
+    /* Sticker category tabs */
+    #stickerTabs::-webkit-scrollbar { height: 4px; }
+    #stickerTabs::-webkit-scrollbar-track { background: transparent; }
+    #stickerTabs::-webkit-scrollbar-thumb { background: var(--sage-300); border-radius: 4px; }
+    .sticker-tab { border: 1px solid transparent; }
+    .sticker-tab:hover { filter: brightness(0.95); }
   </style>
 </head>
 <body class="min-h-screen">
@@ -322,16 +329,20 @@
           </div>
 
           <div>
-            <label class="flex items-center text-sm font-semibold mb-2" style="color: var(--sage-700);">
+            <label class="flex items-center flex-wrap text-sm font-semibold mb-2" style="color: var(--sage-700);">
               <span>✨ Or pick a cute sticker</span>
               <span id="stickerActive" class="tag ml-2 hidden">● selected</span>
             </label>
+            <div id="stickerTabs"
+                 class="flex gap-1.5 overflow-x-auto pb-2 mb-2 -mx-1 px-1"
+                 style="scrollbar-width: thin;">
+            </div>
             <div id="stickerGrid"
-                 class="grid grid-cols-8 sm:grid-cols-10 gap-1.5 p-3 rounded-2xl max-h-44 overflow-y-auto"
+                 class="grid grid-cols-8 sm:grid-cols-10 gap-1.5 p-3 rounded-2xl max-h-52 overflow-y-auto"
                  style="background: var(--cream-50); border: 1.5px solid var(--cream-200);">
             </div>
             <p class="text-xs mt-1.5" style="color: var(--sage-700); opacity: 0.7;">
-              Click a sticker to embed it at the center · click again to deselect.
+              Pick a category → tap a sticker · tap again to deselect.
             </p>
           </div>
 
@@ -505,22 +516,90 @@
   let currentDataUrl = null;
   let selectedSticker = null; // emoji string or null
 
-  // ------------- Sticker library -------------
-  const STICKERS = [
-    '😀','😎','🥰','🤩','😺','🐶','🐱','🐼','🐯','🦁',
-    '🐸','🐵','🦊','🐻','🐰','🦄','🐲','🐙','🐳','🦋',
-    '⭐','🌟','✨','🔥','💥','💫','🌈','☀️','🌙','⚡',
-    '❤️','💙','💚','💛','💜','🧡','🖤','🤍','💖','💝',
-    '🎵','🎶','🎮','🎯','🎁','🎂','🍕','🍔','🍩','🍦',
-    '⚽','🏀','🎨','📷','📱','💻','🚀','🛸','🏆','👑',
-    '👍','✌️','🤘','💪','👀','🙌','🌸','🌺','🌻','🌹',
-    '🍀','🌵','🌴','🍎','🍓','🍇','🥑','🍪','☕','🍺',
+  // ------------- Sticker library (categorized) -------------
+  const STICKER_CATEGORIES = [
+    {
+      key: 'faces', label: '😀 Faces',
+      items: ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','😚','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','😐','😑','😶','😏','😒','🙄','😬','😌','😔','😪','🤤','😴','🥱','😷','🤒','🤕','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','🥸','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','👾','🤖']
+    },
+    {
+      key: 'animals', label: '🐶 Animals',
+      items: ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐽','🐸','🐵','🙈','🙉','🙊','🐒','🐔','🐧','🐦','🐤','🐣','🐥','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷️','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊️','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿️','🦔']
+    },
+    {
+      key: 'hearts', label: '❤️ Hearts',
+      items: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','♥️','💌','💋','👄','💯']
+    },
+    {
+      key: 'nature', label: '🌸 Nature',
+      items: ['⭐','🌟','✨','💫','⚡','☄️','🔥','💥','🌈','☀️','🌤️','⛅','🌥️','☁️','🌦️','🌧️','⛈️','🌩️','🌨️','❄️','☃️','⛄','🌬️','💨','💧','💦','☔','🌊','🌙','🌛','🌜','🌚','🌝','🌞','🪐','🌍','🌎','🌏','🌸','💮','🏵️','🌹','🥀','🌺','🌻','🌼','🌷','🌱','🪴','🌲','🌳','🌴','🌵','🌾','🌿','☘️','🍀','🍁','🍂','🍃','🍄']
+    },
+    {
+      key: 'food', label: '🍔 Food',
+      items: ['🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🥦','🥬','🥒','🌶️','🫑','🌽','🥕','🫒','🧄','🧅','🥔','🍠','🥐','🥯','🍞','🥖','🥨','🧀','🥚','🍳','🧈','🥞','🧇','🥓','🥩','🍗','🍖','🌭','🍔','🍟','🍕','🥪','🥙','🧆','🌮','🌯','🥗','🥘','🫕','🥫','🍝','🍜','🍲','🍛','🍣','🍱','🥟','🦪','🍤','🍙','🍚','🍘','🍥','🥠','🥮','🍢','🍡','🍧','🍨','🍦','🥧','🧁','🍰','🎂','🍮','🍭','🍬','🍫','🍿','🍩','🍪','🌰','🥜','🍯','🥛','🍼','☕','🍵','🧃','🥤','🧋','🍶','🍺','🍻','🥂','🍷','🥃','🍸','🍹','🧉','🍾']
+    },
+    {
+      key: 'activity', label: '⚽ Activity',
+      items: ['⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱','🪀','🏓','🏸','🏒','🏑','🥍','🏏','🪃','🥅','⛳','🪁','🏹','🎣','🤿','🥊','🥋','🎽','🛹','🛼','🛷','⛸️','🥌','🎿','⛷️','🏂','🪂','🏋️','🤼','🤸','⛹️','🤺','🏇','🧘','🏄','🏊','🤽','🚣','🧗','🚵','🚴','🏆','🥇','🥈','🥉','🏅','🎖️','🏵️','🎗️','🎫','🎟️','🎪','🤹','🎭','🩰','🎨','🎬','🎤','🎧','🎼','🎹','🥁','🎷','🎺','🎸','🪕','🎻','🎲','♟️','🎯','🎳','🎮','🎰','🧩']
+    },
+    {
+      key: 'travel', label: '🚀 Travel',
+      items: ['🚗','🚕','🚙','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🛻','🚚','🚛','🚜','🛵','🏍️','🛺','🚲','🛴','🛹','🛼','🚏','🛣️','🛤️','🛢️','⛽','🚨','🚥','🚦','🛑','🚧','⚓','⛵','🛶','🚤','🛳️','⛴️','🛥️','🚢','✈️','🛩️','🛫','🛬','🪂','💺','🚁','🚟','🚠','🚡','🛰️','🚀','🛸','🛎️','🧳','⌛','⏳','⌚','⏰','⏱️','🕰️','🌎','🗺️','🏔️','⛰️','🌋','🗻','🏕️','🏖️','🏜️','🏝️','🏟️','🏛️','🏗️','🪧','🏘️','🏚️','🏠','🏡','🏢','🏣','🏤','🏥','🏦','🏨','🏩','🏪','🏫','🏬','🏭','🏯','🏰','💒','🗼','🗽','⛪','🕌','🛕','🕍','⛩️','🕋','⛲','⛺','🌁','🌃','🏙️','🌄','🌅','🌆','🌇','🌉']
+    },
+    {
+      key: 'tech', label: '📱 Tech',
+      items: ['⌚','📱','📲','💻','⌨️','🖥️','🖨️','🖱️','🖲️','🕹️','🗜️','💽','💾','💿','📀','📼','📷','📸','📹','🎥','📽️','🎞️','📞','☎️','📟','📠','📺','📻','🎙️','🎚️','🎛️','🧭','⏱️','⏲️','⏰','🕰️','⌛','⏳','📡','🔋','🔌','💡','🔦','🕯️','🪔','🧯','🛢️','💸','💵','💴','💶','💷','🪙','💰','💳','💎','⚖️','🪜','🧰','🪛','🔧','🔨','⚒️','🛠️','⛏️','🪚','🔩','⚙️','🪤','🧱','⛓️','🧲','🔫','💣','🧨','🪓','🔪','🗡️','⚔️','🛡️','🚬','⚰️','🪦','⚱️','🏺','🔮','📿','🧿','💈','⚗️','🔭','🔬','🕳️','🩹','🩺','💊','💉','🩸','🧬','🦠','🧫','🧪','🌡️']
+    },
+    {
+      key: 'symbol', label: '✨ Symbols',
+      items: ['👍','👎','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👋','🤚','🖐️','✋','🖖','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦵','🦿','🦶','👂','🦻','👃','🧠','🫀','🫁','🦷','🦴','👀','👁️','👅','👄','💯','💢','💥','💫','💦','💨','🕳️','💣','💬','👁️‍🗨️','🗨️','🗯️','💭','💤','🆗','🆕','🆒','🆓','🆙','🆚','🈁','🈯','🈳','🈵','🈲','🉐','🉑','㊗️','㊙️','🈘','🈚','🈸','🈴','🈺','🅰️','🅱️','🆎','🆑','🅾️','🆘','❌','⭕','🛑','⛔','📛','🚫','💢','♨️','🚷','🚯','🚳','🚱','🔞','📵','🚭','✅','🈯','💹','❇️','✳️','❎','🌐','💠','Ⓜ️','🌀','💤','🏧','🚾','♿','🅿️','🛗','🈳','🈂️','🛂','🛃','🛄','🛅','🚹','🚺','🚼','⚧','🚻','🚮','🎦','📶','🈁','🔣','ℹ️','🔤','🔡','🔠','🆎','🆑','🆒','🆓','🆕','🆖','🆗','🆘','🆙','🆚','🈁','🈂️','🈷️','🈶','🈯','🉐','🈹','🈚','🈲','🉑','🈸','🈴','🈳','㊗️','㊙️','🈺','🈵','▶️','⏸️','⏯️','⏹️','⏺️','⏭️','⏮️','⏩','⏪','⏫','⏬','◀️','🔼','🔽','➡️','⬅️','⬆️','⬇️','↗️','↘️','↙️','↖️','↕️','↔️','↪️','↩️','⤴️','⤵️','🔀','🔁','🔂','🔄','🔃','🎵','🎶','➕','➖','➗','✖️','♾️','💲','💱','™️','©️','®️','〰️','➰','➿','🔚','🔙','🔛','🔝','🔜']
+    },
+    {
+      key: 'objects', label: '🎁 Objects',
+      items: ['🎁','🎀','🎈','🎉','🎊','🪅','🪆','🧧','✨','🎇','🎆','🧨','🪔','🕯️','🪞','🪟','🛏️','🛋️','🪑','🚽','🪠','🚿','🛁','🪒','🧴','🧷','🧹','🧺','🧻','🪣','🧼','🪥','🧽','🪦','🛒','🏷️','💌','📩','📨','📧','💼','📁','📂','🗂️','📅','📆','🗒️','🗓️','📇','📈','📉','📊','📋','📌','📍','📎','🖇️','📏','📐','✂️','🗃️','🗄️','🗑️','🔒','🔓','🔏','🔐','🔑','🗝️','🔨','🪓','⛏️','⚒️','🛠️','🗡️','⚔️','🔫','🪃','🏹','🛡️','🪚','🔧','🪛','🔩','⚙️','🗜️','⚖️','🦯','🔗','⛓️','🪝','🧰','🧲','🪜','⚗️','🧪','🧫','🧬','🔬','🔭','📡','💉','🩸','💊','🩹','🩺','🚪','🪞','🪟','🛏️','🛋️','🪑','🚽','🪠','🚿','🛁','🪤','🪒','🧴','🧷','🧹','🧺','🧻','🪣','🧼','🪥','🧽','🧯','🛒','🚬','⚰️','🪦','⚱️','🗿','🪧','🪪','👑','💎','💍','💄','💋','👑']
+    }
   ];
 
+  let currentCategory = STICKER_CATEGORIES[0].key;
+
+  function dedupe(arr) { return Array.from(new Set(arr)); }
+
   function initStickerGrid() {
+    // Build category tab strip
+    const tabsWrap = document.getElementById('stickerTabs');
+    tabsWrap.innerHTML = '';
+    STICKER_CATEGORIES.forEach(cat => {
+      const tab = document.createElement('button');
+      tab.type = 'button';
+      tab.dataset.cat = cat.key;
+      tab.textContent = cat.label;
+      tab.className = 'sticker-tab whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-semibold transition';
+      tab.addEventListener('click', () => {
+        currentCategory = cat.key;
+        renderStickerGrid();
+        updateTabs();
+      });
+      tabsWrap.appendChild(tab);
+    });
+    updateTabs();
+    renderStickerGrid();
+  }
+
+  function updateTabs() {
+    document.querySelectorAll('.sticker-tab').forEach(t => {
+      if (t.dataset.cat === currentCategory) {
+        t.style.cssText = 'background: var(--sage-600); color: white;';
+      } else {
+        t.style.cssText = 'background: var(--cream-100); color: var(--sage-700);';
+      }
+    });
+  }
+
+  function renderStickerGrid() {
+    const cat = STICKER_CATEGORIES.find(c => c.key === currentCategory);
     const grid = document.getElementById('stickerGrid');
     grid.innerHTML = '';
-    STICKERS.forEach(emoji => {
+    dedupe(cat.items).forEach(emoji => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.textContent = emoji;
@@ -536,6 +615,7 @@
       });
       grid.appendChild(btn);
     });
+    updateStickerSelection();
   }
 
   function updateStickerSelection() {
@@ -626,26 +706,31 @@
     return { canvas, ctx, actualSize };
   }
 
-  function drawLogoOnCanvas(canvas, imgEl, bgColorHex) {
+  function drawLogoOnCanvas(canvas, imgEl, bgColorHex, opts = {}) {
     const ctx = canvas.getContext('2d');
     const size = canvas.width;
 
-    // Target logo ~22% of QR size, max-fit preserving aspect ratio
-    const targetMax = Math.floor(size * 0.22);
+    // sizeRatio: 0.22 for logo (with frame), 0.16 for sticker (smaller)
+    // frame: true draws a bg pad behind it; false = transparent (sticker mode)
+    const sizeRatio = opts.sizeRatio ?? 0.22;
+    const frame     = opts.frame ?? true;
+
+    const targetMax = Math.floor(size * sizeRatio);
     let lw = imgEl.naturalWidth;
     let lh = imgEl.naturalHeight;
     const scale = Math.min(targetMax / lw, targetMax / lh);
     lw = Math.round(lw * scale);
     lh = Math.round(lh * scale);
 
-    const pad = Math.max(6, Math.floor(size * 0.02));
-    const bw = lw + pad * 2;
-    const bh = lh + pad * 2;
-    const bx = Math.floor((size - bw) / 2);
-    const by = Math.floor((size - bh) / 2);
-
-    ctx.fillStyle = bgColorHex;
-    ctx.fillRect(bx, by, bw, bh);
+    if (frame) {
+      const pad = Math.max(6, Math.floor(size * 0.02));
+      const bw = lw + pad * 2;
+      const bh = lh + pad * 2;
+      const bx = Math.floor((size - bw) / 2);
+      const by = Math.floor((size - bh) / 2);
+      ctx.fillStyle = bgColorHex;
+      ctx.fillRect(bx, by, bw, bh);
+    }
 
     const lx = Math.floor((size - lw) / 2);
     const ly = Math.floor((size - lh) / 2);
@@ -691,10 +776,11 @@
 
       if (hasFileLogo) {
         const img = await loadImageFromFile(logoInput.files[0]);
-        drawLogoOnCanvas(qrCanvas, img, bgColor.value);
+        drawLogoOnCanvas(qrCanvas, img, bgColor.value, { sizeRatio: 0.22, frame: true });
       } else if (hasSticker) {
         const img = await renderEmojiToImage(selectedSticker, 256);
-        drawLogoOnCanvas(qrCanvas, img, bgColor.value);
+        // Smaller + no frame for stickers
+        drawLogoOnCanvas(qrCanvas, img, bgColor.value, { sizeRatio: 0.16, frame: false });
       }
 
       qrCanvas.classList.remove('hidden');
