@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Code Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+  <style>
+    :root {
+      --cream-50:  #FBF8F0;
+      --cream-100: #F5EFE0;
+      --cream-200: #EBE3CC;
+      --sage-50:   #EEF4EA;
+      --sage-100:  #DCE8D3;
+      --sage-300:  #A8C29A;
+      --sage-500:  #6B9A66;
+      --sage-600:  #547F50;
+      --sage-700:  #3F6340;
+      --sage-900:  #243D26;
+      --peach:     #F4C9A8;
+      --peach-dk:  #D89773;
+    }
+    body {
+      background: linear-gradient(135deg, #FBF8F0 0%, #F0EAD8 50%, #E8E9D6 100%);
+      background-attachment: fixed;
+      color: var(--sage-900);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Plus Jakarta Sans", "Nunito", sans-serif;
+    }
+    .spinner {
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      width: 18px; height: 18px;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .toast { animation: slidein 0.25s ease-out; }
+    @keyframes slidein {
+      from { transform: translateY(-10px); opacity: 0; }
+      to   { transform: translateY(0);     opacity: 1; }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-4px); }
+    }
+    .float-anim { animation: float 3s ease-in-out infinite; }
+
+    /* Pretty card */
+    .card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(168, 194, 154, 0.25);
+      box-shadow: 0 4px 18px rgba(84, 127, 80, 0.08);
+    }
+
+    /* Inputs */
+    .field {
+      background: var(--cream-50);
+      border: 1.5px solid var(--cream-200);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: var(--sage-900);
+      transition: all 0.15s;
+      outline: none;
+    }
+    .field:focus {
+      border-color: var(--sage-500);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(107, 154, 102, 0.15);
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: linear-gradient(135deg, var(--sage-600), var(--sage-500));
+      color: white;
+      border-radius: 14px;
+      font-weight: 600;
+      transition: all 0.2s;
+      box-shadow: 0 3px 10px rgba(84, 127, 80, 0.25);
+    }
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 16px rgba(84, 127, 80, 0.35);
+    }
+    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .btn-accent {
+      background: linear-gradient(135deg, var(--peach-dk), var(--peach));
+      color: white;
+      border-radius: 14px;
+      font-weight: 600;
+      transition: all 0.2s;
+      box-shadow: 0 3px 10px rgba(216, 151, 115, 0.25);
+    }
+    .btn-accent:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 16px rgba(216, 151, 115, 0.35);
+    }
+    .btn-accent:disabled {
+      background: var(--cream-200);
+      color: #aaa;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .btn-soft {
+      background: var(--sage-50);
+      color: var(--sage-700);
+      border-radius: 12px;
+      font-weight: 500;
+      border: 1px solid var(--sage-100);
+      transition: all 0.15s;
+    }
+    .btn-soft:hover { background: var(--sage-100); }
+
+    .btn-dark {
+      background: var(--sage-900);
+      color: var(--cream-50);
+      border-radius: 12px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-dark:hover { background: var(--sage-700); transform: translateY(-1px); }
+
+    /* Color picker styling */
+    input[type="color"] {
+      cursor: pointer;
+      border: 2px solid var(--cream-200);
+      border-radius: 12px;
+      padding: 4px;
+      background: var(--cream-50);
+    }
+
+    /* Custom scrollbar for sticker grid */
+    #stickerGrid::-webkit-scrollbar { width: 6px; }
+    #stickerGrid::-webkit-scrollbar-track { background: var(--cream-100); border-radius: 10px; }
+    #stickerGrid::-webkit-scrollbar-thumb { background: var(--sage-300); border-radius: 10px; }
+
+    /* Sticker buttons */
+    .sticker-btn {
+      transition: all 0.15s;
+    }
+    .sticker-btn:hover { background: var(--sage-50); transform: scale(1.15); }
+    .sticker-active {
+      background: var(--sage-100) !important;
+      border-color: var(--sage-500) !important;
+      box-shadow: 0 0 0 2px rgba(107, 154, 102, 0.3);
+    }
+
+    /* Tag */
+    .tag {
+      background: var(--sage-100);
+      color: var(--sage-700);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    /* Decorative blob */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      z-index: -1;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- Decorative background blobs -->
+  <div class="blob" style="width: 320px; height: 320px; background: #A8C29A; top: -80px; left: -80px;"></div>
+  <div class="blob" style="width: 380px; height: 380px; background: #F4C9A8; bottom: -100px; right: -100px;"></div>
+
+  <div class="max-w-6xl mx-auto p-4 sm:p-6">
+
+    <header class="mb-8 flex items-center justify-between flex-wrap gap-3">
+      <div class="flex items-center gap-3">
+        <div class="float-anim w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
+             style="background: linear-gradient(135deg, #DCE8D3, #F4C9A8); box-shadow: 0 4px 12px rgba(84,127,80,0.2);">
+          🌿
+        </div>
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-bold" style="color: var(--sage-900);">
+            QR Code Generator
+          </h1>
+          <p class="text-xs sm:text-sm" style="color: var(--sage-700); opacity: 0.75;">
+            Cozy · Offline · No installation needed ✨
+          </p>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button id="shareBtn" class="btn-accent px-4 py-2 text-sm flex items-center gap-1.5">
+          <span>🔗</span> Share
+        </button>
+        <button id="toggleHistoryBtn" class="btn-dark px-4 py-2 text-sm flex items-center gap-1.5">
+          <span>📚</span> History
+        </button>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <!-- LEFT: Form -->
+      <section class="card rounded-3xl p-6 sm:p-7">
+        <div class="flex items-center gap-2 mb-5">
+          <span class="text-xl">⚙️</span>
+          <h2 class="text-lg font-bold" style="color: var(--sage-900);">Customize</h2>
+        </div>
+
+        <form id="qrForm" class="space-y-5">
+
+          <div>
+            <label class="block text-sm font-semibold mb-2" style="color: var(--sage-700);">
+              🔗 URL
+            </label>
+            <div class="flex gap-2">
+              <input id="urlInput" type="text" required
+                     placeholder="https://youtube.com/..."
+                     class="field flex-1 text-sm" />
+              <button type="button" id="copyUrlBtn" class="btn-soft px-4 text-sm">
+                Copy
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold mb-2" style="color: var(--sage-700);">
+                🎨 Foreground
+              </label>
+              <input id="fgColor" type="color" value="#3F6340" class="w-full h-11" />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-2" style="color: var(--sage-700);">
+                🪞 Background
+              </label>
+              <input id="bgColor" type="color" value="#FBF8F0" class="w-full h-11" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold mb-2" style="color: var(--sage-700);">
+                📏 Size
+              </label>
+              <select id="sizeSelect" class="field w-full text-sm">
+                <option value="200">Small (200px)</option>
+                <option value="300" selected>Medium (300px)</option>
+                <option value="500">Large (500px)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-2" style="color: var(--sage-700);">
+                🛡️ Error Correction
+              </label>
+              <select id="ecSelect" class="field w-full text-sm">
+                <option value="L">L (~7%)</option>
+                <option value="M" selected>M (~15%)</option>
+                <option value="Q">Q (~25%)</option>
+                <option value="H">H (~30%)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold mb-2" style="color: var(--sage-700);">
+              🖼️ Logo (optional)
+            </label>
+            <div class="flex items-center gap-2">
+              <input id="logoInput" type="file" accept="image/*"
+                     class="block w-full text-sm
+                            file:mr-3 file:py-2 file:px-4 file:rounded-xl
+                            file:border-0 file:text-sm file:font-semibold
+                            file:cursor-pointer
+                            file:bg-[#DCE8D3] file:text-[#3F6340]
+                            hover:file:bg-[#C8DBBE]" />
+              <button type="button" id="clearLogoBtn" class="btn-soft px-4 text-sm">
+                Clear
+              </button>
+            </div>
+            <p class="text-xs mt-1.5" style="color: var(--sage-700); opacity: 0.7;">
+              💡 Adding a logo auto-sets error correction to H for scannability.
+            </p>
+          </div>
+
+          <div>
+            <label class="flex items-center text-sm font-semibold mb-2" style="color: var(--sage-700);">
+              <span>✨ Or pick a cute sticker</span>
+              <span id="stickerActive" class="tag ml-2 hidden">● selected</span>
+            </label>
+            <div id="stickerGrid"
+                 class="grid grid-cols-8 sm:grid-cols-10 gap-1.5 p-3 rounded-2xl max-h-44 overflow-y-auto"
+                 style="background: var(--cream-50); border: 1.5px solid var(--cream-200);">
+            </div>
+            <p class="text-xs mt-1.5" style="color: var(--sage-700); opacity: 0.7;">
+              Click a sticker to embed it at the center · click again to deselect.
+            </p>
+          </div>
+
+          <button id="generateBtn" type="submit"
+                  class="btn-primary w-full flex items-center justify-center gap-2 py-3 text-base">
+            <span id="genSpinner" class="spinner hidden"></span>
+            <span id="genLabel">✨ Generate QR</span>
+          </button>
+
+        </form>
+      </section>
+
+      <!-- RIGHT: Preview -->
+      <section class="card rounded-3xl p-6 sm:p-7 flex flex-col">
+        <div class="flex items-center gap-2 mb-5">
+          <span class="text-xl">👀</span>
+          <h2 class="text-lg font-bold" style="color: var(--sage-900);">Preview</h2>
+        </div>
+        <div id="previewBox"
+             class="flex-1 flex items-center justify-center rounded-2xl min-h-[280px] p-5 relative overflow-hidden"
+             style="background: linear-gradient(135deg, #FBF8F0, #EEF4EA); border: 1.5px dashed var(--sage-300);">
+          <div id="placeholderText" class="text-center" style="color: var(--sage-700); opacity: 0.6;">
+            <div class="text-5xl mb-3 float-anim">🌱</div>
+            <p class="text-sm font-medium">Your QR will bloom here</p>
+          </div>
+          <canvas id="qrCanvas" class="hidden max-w-full rounded-xl" style="box-shadow: 0 8px 24px rgba(84,127,80,0.15);"></canvas>
+        </div>
+        <button id="downloadBtn" disabled
+                class="btn-accent mt-5 w-full py-3 text-base flex items-center justify-center gap-2">
+          <span>⬇️</span> Download PNG
+        </button>
+      </section>
+
+    </div>
+
+    <!-- HISTORY PANEL -->
+    <section id="historyPanel" class="card mt-6 rounded-3xl p-6 sm:p-7 hidden">
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📚</span>
+          <h2 class="text-lg font-bold" style="color: var(--sage-900);">History</h2>
+        </div>
+        <button id="clearAllBtn"
+                class="px-4 py-2 rounded-xl text-sm font-medium transition"
+                style="background: #FCE4DC; color: #B45A3F;"
+                onmouseover="this.style.background='#F8D2C5'"
+                onmouseout="this.style.background='#FCE4DC'">
+          🗑️ Clear All
+        </button>
+      </div>
+      <div id="historyGrid"
+           class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      </div>
+      <div id="historyEmpty" class="hidden text-center py-10" style="color: var(--sage-700); opacity: 0.6;">
+        <div class="text-4xl mb-2">🍃</div>
+        <p class="text-sm">No QR codes yet — create your first one above!</p>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="hidden fixed top-5 right-5 z-50 toast">
+    <div id="toastBox" class="px-4 py-2 rounded-lg shadow-md text-sm font-medium text-white"></div>
+  </div>
+
+  <!-- Share Modal -->
+  <div id="shareModal" class="hidden fixed inset-0 z-40 flex items-center justify-center p-4"
+       style="background: rgba(36, 61, 38, 0.45); backdrop-filter: blur(4px);">
+    <div class="rounded-3xl max-w-lg w-full p-7 relative"
+         style="background: var(--cream-50); box-shadow: 0 20px 60px rgba(36,61,38,0.25); border: 1px solid var(--sage-100);">
+      <button id="shareCloseBtn"
+              class="absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center transition"
+              style="background: var(--cream-100); color: var(--sage-700);"
+              onmouseover="this.style.background='var(--cream-200)'"
+              onmouseout="this.style.background='var(--cream-100)'">✕</button>
+
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-2xl">🔗</span>
+        <h3 class="text-xl font-bold" style="color: var(--sage-900);">Share this Generator</h3>
+      </div>
+      <p class="text-sm mb-5" style="color: var(--sage-700); opacity: 0.8;">
+        It's a single HTML file — share it however you like ✨
+      </p>
+
+      <div class="space-y-3">
+
+        <div class="rounded-2xl p-4" style="background: white; border: 1.5px solid var(--sage-100);">
+          <p class="font-bold text-sm flex items-center gap-1.5" style="color: var(--sage-900);">
+            <span>📁</span> Option 1: Send the file directly
+          </p>
+          <p class="text-xs mt-1.5" style="color: var(--sage-700);">
+            Send <code class="px-1.5 py-0.5 rounded text-[11px]" style="background: var(--cream-100);">qr-generator.html</code>
+            via email / LINE / Messenger. Double-click to open.
+          </p>
+          <button id="downloadHtmlBtn" class="btn-dark mt-3 px-4 py-2 text-xs">
+            ⬇️ Download HTML file
+          </button>
+        </div>
+
+        <div class="rounded-2xl p-4" style="background: white; border: 1.5px solid var(--sage-100);">
+          <p class="font-bold text-sm flex items-center gap-1.5" style="color: var(--sage-900);">
+            <span>🌐</span> Option 2: Host online → get a link
+          </p>
+          <p class="text-xs mt-1.5" style="color: var(--sage-700);">
+            Drag the HTML to one of these free hosts to get a public URL:
+          </p>
+          <ul class="text-xs mt-2 space-y-1.5 pl-5 list-disc" style="color: var(--sage-900);">
+            <li><b>Netlify Drop</b> —
+              <a href="https://app.netlify.com/drop" target="_blank" class="font-medium underline" style="color: var(--sage-600);">app.netlify.com/drop</a>
+              <span style="color: var(--sage-700); opacity: 0.7;">(drag-drop, instant, no signup)</span>
+            </li>
+            <li><b>GitHub Pages</b> — push to a repo, enable Pages</li>
+            <li><b>Vercel</b> —
+              <a href="https://vercel.com" target="_blank" class="font-medium underline" style="color: var(--sage-600);">vercel.com</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="rounded-2xl p-4" style="background: white; border: 1.5px solid var(--sage-100);">
+          <p class="font-bold text-sm flex items-center gap-1.5" style="color: var(--sage-900);">
+            <span>📋</span> Option 3: Copy current page link
+          </p>
+          <p class="text-xs mt-1.5" style="color: var(--sage-700);">
+            If this page is already at a URL, copy it here:
+          </p>
+          <div class="flex gap-2 mt-2.5">
+            <input id="shareUrlInput" readonly class="field flex-1 text-xs" />
+            <button id="copyShareUrlBtn" class="btn-primary px-4 py-2 text-xs">
+              Copy
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ------------- DOM -------------
+  const form              = document.getElementById('qrForm');
+  const urlInput          = document.getElementById('urlInput');
+  const fgColor           = document.getElementById('fgColor');
+  const bgColor           = document.getElementById('bgColor');
+  const sizeSelect        = document.getElementById('sizeSelect');
+  const ecSelect          = document.getElementById('ecSelect');
+  const logoInput         = document.getElementById('logoInput');
+  const clearLogoBtn      = document.getElementById('clearLogoBtn');
+  const copyUrlBtn        = document.getElementById('copyUrlBtn');
+  const generateBtn       = document.getElementById('generateBtn');
+  const genSpinner        = document.getElementById('genSpinner');
+  const genLabel          = document.getElementById('genLabel');
+  const qrCanvas          = document.getElementById('qrCanvas');
+  const placeholderText   = document.getElementById('placeholderText');
+  const downloadBtn       = document.getElementById('downloadBtn');
+  const toggleHistoryBtn  = document.getElementById('toggleHistoryBtn');
+  const historyPanel      = document.getElementById('historyPanel');
+  const historyGrid       = document.getElementById('historyGrid');
+  const historyEmpty      = document.getElementById('historyEmpty');
+  const clearAllBtn       = document.getElementById('clearAllBtn');
+
+  const STORAGE_KEY = 'qr_history_v1';
+  let currentUrl = '';
+  let currentDataUrl = null;
+  let selectedSticker = null; // emoji string or null
+
+  // ------------- Sticker library -------------
+  const STICKERS = [
+    '😀','😎','🥰','🤩','😺','🐶','🐱','🐼','🐯','🦁',
+    '🐸','🐵','🦊','🐻','🐰','🦄','🐲','🐙','🐳','🦋',
+    '⭐','🌟','✨','🔥','💥','💫','🌈','☀️','🌙','⚡',
+    '❤️','💙','💚','💛','💜','🧡','🖤','🤍','💖','💝',
+    '🎵','🎶','🎮','🎯','🎁','🎂','🍕','🍔','🍩','🍦',
+    '⚽','🏀','🎨','📷','📱','💻','🚀','🛸','🏆','👑',
+    '👍','✌️','🤘','💪','👀','🙌','🌸','🌺','🌻','🌹',
+    '🍀','🌵','🌴','🍎','🍓','🍇','🥑','🍪','☕','🍺',
+  ];
+
+  function initStickerGrid() {
+    const grid = document.getElementById('stickerGrid');
+    grid.innerHTML = '';
+    STICKERS.forEach(emoji => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = emoji;
+      btn.dataset.emoji = emoji;
+      btn.className = 'sticker-btn aspect-square flex items-center justify-center text-xl rounded-lg border border-transparent';
+      btn.addEventListener('click', () => {
+        if (selectedSticker === emoji) {
+          selectedSticker = null;
+        } else {
+          selectedSticker = emoji;
+        }
+        updateStickerSelection();
+      });
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateStickerSelection() {
+    document.querySelectorAll('.sticker-btn').forEach(b => {
+      if (b.dataset.emoji === selectedSticker) {
+        b.classList.add('sticker-active');
+      } else {
+        b.classList.remove('sticker-active');
+      }
+    });
+    document.getElementById('stickerActive').classList.toggle('hidden', !selectedSticker);
+  }
+
+  function renderEmojiToImage(emoji, size) {
+    return new Promise(resolve => {
+      const c = document.createElement('canvas');
+      c.width = size; c.height = size;
+      const ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, size, size);
+      ctx.font = `${Math.floor(size * 0.85)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(emoji, size / 2, size / 2 + size * 0.05);
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.src = c.toDataURL('image/png');
+    });
+  }
+
+  // ------------- Toast -------------
+  function toast(msg, kind = 'success') {
+    const wrap = document.getElementById('toast');
+    const box  = document.getElementById('toastBox');
+    box.textContent = msg;
+    const styles = {
+      success: 'background: linear-gradient(135deg, #547F50, #6B9A66); color: white;',
+      error:   'background: linear-gradient(135deg, #B45A3F, #D87B5A); color: white;',
+      info:    'background: linear-gradient(135deg, #3F6340, #547F50); color: white;',
+    };
+    box.style.cssText = (styles[kind] || styles.success) +
+      ' padding: 10px 18px; border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); font-size: 14px; font-weight: 600;';
+    box.className = '';
+    wrap.classList.remove('hidden');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => wrap.classList.add('hidden'), 2400);
+  }
+
+  function setLoading(loading) {
+    generateBtn.disabled = loading;
+    genSpinner.classList.toggle('hidden', !loading);
+    genLabel.textContent = loading ? 'Generating...' : '✨ Generate QR';
+  }
+
+  // ------------- QR drawing -------------
+  function drawQR(text, opts) {
+    const ec = opts.errorCorrection;
+    // typeNumber=0 → auto-fit
+    const qr = qrcode(0, ec);
+    qr.addData(text);
+    qr.make();
+
+    const moduleCount = qr.getModuleCount();
+    const border      = 4; // quiet zone modules
+    const totalModules = moduleCount + border * 2;
+    const size = opts.size;
+    const cell = Math.floor(size / totalModules);
+    const actualSize = cell * totalModules;
+
+    const canvas = opts.canvas;
+    canvas.width  = actualSize;
+    canvas.height = actualSize;
+    const ctx = canvas.getContext('2d');
+
+    // background
+    ctx.fillStyle = opts.bgColor;
+    ctx.fillRect(0, 0, actualSize, actualSize);
+
+    // dots
+    ctx.fillStyle = opts.fgColor;
+    for (let r = 0; r < moduleCount; r++) {
+      for (let c = 0; c < moduleCount; c++) {
+        if (qr.isDark(r, c)) {
+          ctx.fillRect((c + border) * cell, (r + border) * cell, cell, cell);
+        }
+      }
+    }
+
+    return { canvas, ctx, actualSize };
+  }
+
+  function drawLogoOnCanvas(canvas, imgEl, bgColorHex) {
+    const ctx = canvas.getContext('2d');
+    const size = canvas.width;
+
+    // Target logo ~22% of QR size, max-fit preserving aspect ratio
+    const targetMax = Math.floor(size * 0.22);
+    let lw = imgEl.naturalWidth;
+    let lh = imgEl.naturalHeight;
+    const scale = Math.min(targetMax / lw, targetMax / lh);
+    lw = Math.round(lw * scale);
+    lh = Math.round(lh * scale);
+
+    const pad = Math.max(6, Math.floor(size * 0.02));
+    const bw = lw + pad * 2;
+    const bh = lh + pad * 2;
+    const bx = Math.floor((size - bw) / 2);
+    const by = Math.floor((size - bh) / 2);
+
+    ctx.fillStyle = bgColorHex;
+    ctx.fillRect(bx, by, bw, bh);
+
+    const lx = Math.floor((size - lw) / 2);
+    const ly = Math.floor((size - lh) / 2);
+    ctx.drawImage(imgEl, lx, ly, lw, lh);
+  }
+
+  function loadImageFromFile(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ------------- Generate handler -------------
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const url = urlInput.value.trim();
+    if (!url) return;
+
+    setLoading(true);
+    try {
+      const hasFileLogo = !!(logoInput.files && logoInput.files[0]);
+      const hasSticker  = !!selectedSticker;
+      const hasOverlay  = hasFileLogo || hasSticker;
+      // File/sticker forces H for scannability
+      const ec = hasOverlay ? 'H' : ecSelect.value;
+      const size = parseInt(sizeSelect.value, 10);
+
+      drawQR(url, {
+        canvas: qrCanvas,
+        size,
+        fgColor: fgColor.value,
+        bgColor: bgColor.value,
+        errorCorrection: ec,
+      });
+
+      if (hasFileLogo) {
+        const img = await loadImageFromFile(logoInput.files[0]);
+        drawLogoOnCanvas(qrCanvas, img, bgColor.value);
+      } else if (hasSticker) {
+        const img = await renderEmojiToImage(selectedSticker, 256);
+        drawLogoOnCanvas(qrCanvas, img, bgColor.value);
+      }
+
+      qrCanvas.classList.remove('hidden');
+      placeholderText.classList.add('hidden');
+      downloadBtn.disabled = false;
+
+      currentUrl = url;
+      currentDataUrl = qrCanvas.toDataURL('image/png');
+
+      saveToHistory({
+        id: Date.now(),
+        url,
+        fg_color: fgColor.value,
+        bg_color: bgColor.value,
+        size: String(size),
+        error_correction: ec,
+        has_logo: hasOverlay,
+        sticker: hasSticker ? selectedSticker : null,
+        thumbnail: makeThumbnail(qrCanvas, 120),
+        created_at: new Date().toISOString(),
+      });
+
+      toast('QR generated');
+      renderHistory();
+    } catch (err) {
+      console.error(err);
+      toast(err.message || 'Generation failed', 'error');
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  // ------------- Download -------------
+  downloadBtn.addEventListener('click', () => {
+    if (!currentDataUrl) return;
+    const a = document.createElement('a');
+    a.href = currentDataUrl;
+    a.download = `${domainFromUrl(currentUrl)}_${timestampStr()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    toast('Downloaded');
+  });
+
+  function domainFromUrl(u) {
+    try {
+      const url = new URL(u.includes('://') ? u : 'http://' + u);
+      const host = url.hostname.replace(/^www\./, '');
+      const base = host.split('.')[0] || 'qr';
+      return base.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'qr';
+    } catch {
+      return 'qr';
+    }
+  }
+
+  function timestampStr() {
+    const d = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+  }
+
+  // ------------- Copy / clear -------------
+  copyUrlBtn.addEventListener('click', async () => {
+    const v = urlInput.value.trim();
+    if (!v) { toast('Nothing to copy', 'info'); return; }
+    try {
+      await navigator.clipboard.writeText(v);
+      toast('URL copied');
+    } catch {
+      // fallback for non-secure contexts
+      const ta = document.createElement('textarea');
+      ta.value = v; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); toast('URL copied'); }
+      catch { toast('Copy failed', 'error'); }
+      ta.remove();
+    }
+  });
+
+  clearLogoBtn.addEventListener('click', () => {
+    logoInput.value = '';
+    selectedSticker = null;
+    updateStickerSelection();
+  });
+
+  // ------------- History (LocalStorage) -------------
+  function loadHistory() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveHistory(list) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    } catch (e) {
+      toast('Storage full — old items kept', 'error');
+    }
+  }
+
+  function saveToHistory(item) {
+    const list = loadHistory();
+    list.unshift(item);
+    // cap to 200 items
+    if (list.length > 200) list.length = 200;
+    saveHistory(list);
+  }
+
+  function makeThumbnail(srcCanvas, maxSize) {
+    const scale = Math.min(maxSize / srcCanvas.width, maxSize / srcCanvas.height);
+    const w = Math.round(srcCanvas.width * scale);
+    const h = Math.round(srcCanvas.height * scale);
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    c.getContext('2d').drawImage(srcCanvas, 0, 0, w, h);
+    return c.toDataURL('image/png');
+  }
+
+  toggleHistoryBtn.addEventListener('click', () => {
+    historyPanel.classList.toggle('hidden');
+    if (!historyPanel.classList.contains('hidden')) renderHistory();
+  });
+
+  clearAllBtn.addEventListener('click', () => {
+    if (!confirm('Clear all history?')) return;
+    saveHistory([]);
+    renderHistory();
+    toast('History cleared');
+  });
+
+  function renderHistory() {
+    const list = loadHistory();
+    historyGrid.innerHTML = '';
+    if (!list.length) {
+      historyEmpty.classList.remove('hidden');
+      return;
+    }
+    historyEmpty.classList.add('hidden');
+    for (const item of list) {
+      const card = document.createElement('div');
+      card.className = 'group relative rounded-2xl p-3 cursor-pointer transition';
+      card.style.cssText = 'background: white; border: 1.5px solid var(--sage-100); box-shadow: 0 2px 6px rgba(84,127,80,0.06);';
+      card.onmouseover = () => { card.style.boxShadow = '0 6px 18px rgba(84,127,80,0.15)'; card.style.transform = 'translateY(-2px)'; };
+      card.onmouseout  = () => { card.style.boxShadow = '0 2px 6px rgba(84,127,80,0.06)'; card.style.transform = 'translateY(0)'; };
+      card.innerHTML = `
+        <img src="${item.thumbnail}" class="w-full h-28 object-contain rounded-xl mb-2" style="background: var(--cream-50);" />
+        <p class="text-xs truncate font-medium" style="color: var(--sage-900);" title="${escapeHtml(item.url)}">${escapeHtml(item.url)}</p>
+        <p class="text-[10px] mt-0.5" style="color: var(--sage-700); opacity: 0.6;">${new Date(item.created_at).toLocaleString()}</p>
+        <button data-id="${item.id}"
+                class="del-btn absolute top-2 right-2 w-7 h-7 rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                style="background: white; color: #B45A3F; border: 1px solid #F5C6B5; box-shadow: 0 2px 6px rgba(0,0,0,0.08);"
+                onmouseover="this.style.background='#FCE4DC'"
+                onmouseout="this.style.background='white'">
+          ✕
+        </button>
+      `;
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.del-btn')) return;
+        reloadSettings(item);
+      });
+      card.querySelector('.del-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const list = loadHistory().filter(x => x.id !== item.id);
+        saveHistory(list);
+        renderHistory();
+        toast('Deleted', 'info');
+      });
+      historyGrid.appendChild(card);
+    }
+  }
+
+  function reloadSettings(item) {
+    urlInput.value   = item.url;
+    fgColor.value    = item.fg_color;
+    bgColor.value    = item.bg_color;
+    sizeSelect.value = item.size;
+    ecSelect.value   = item.error_correction;
+    logoInput.value  = '';
+    selectedSticker  = item.sticker || null;
+    updateStickerSelection();
+    toast('Settings loaded — click Generate', 'info');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  // ------------- Share modal -------------
+  const shareBtn         = document.getElementById('shareBtn');
+  const shareModal       = document.getElementById('shareModal');
+  const shareCloseBtn    = document.getElementById('shareCloseBtn');
+  const downloadHtmlBtn  = document.getElementById('downloadHtmlBtn');
+  const shareUrlInput    = document.getElementById('shareUrlInput');
+  const copyShareUrlBtn  = document.getElementById('copyShareUrlBtn');
+
+  shareBtn.addEventListener('click', () => {
+    shareUrlInput.value = window.location.href;
+    shareModal.classList.remove('hidden');
+  });
+  shareCloseBtn.addEventListener('click', () => shareModal.classList.add('hidden'));
+  shareModal.addEventListener('click', (e) => {
+    if (e.target === shareModal) shareModal.classList.add('hidden');
+  });
+
+  copyShareUrlBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrlInput.value);
+      toast('Link copied');
+    } catch {
+      shareUrlInput.select();
+      try { document.execCommand('copy'); toast('Link copied'); }
+      catch { toast('Copy failed', 'error'); }
+    }
+  });
+
+  downloadHtmlBtn.addEventListener('click', async () => {
+    try {
+      // Grab the current page HTML and offer it as a download
+      const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'qr-generator.html';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      toast('HTML file downloaded');
+    } catch (e) {
+      toast('Download failed', 'error');
+    }
+  });
+
+  // ------------- Init -------------
+  initStickerGrid();
+  renderHistory();
+</script>
+</body>
+</html>
