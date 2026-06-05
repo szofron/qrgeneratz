@@ -225,20 +225,25 @@
           🌿
         </div>
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold" style="color: var(--sage-900);">
+          <h1 class="text-2xl sm:text-3xl font-bold" style="color: var(--sage-900);" data-i18n="appTitle">
             QR Code Generator
           </h1>
-          <p class="text-xs sm:text-sm" style="color: var(--sage-700); opacity: 0.75;">
+          <p class="text-xs sm:text-sm" style="color: var(--sage-700); opacity: 0.75;" data-i18n="tagline">
             Cozy · Offline · No installation needed ✨
           </p>
         </div>
       </div>
-      <div class="flex gap-2">
+      <div class="flex gap-2 items-center">
+        <button id="langToggleBtn"
+                class="px-3 py-2 rounded-xl text-sm font-bold transition"
+                style="background: var(--cream-100); color: var(--sage-700); border: 1.5px solid var(--sage-100);">
+          <span id="langLabel">TH</span>
+        </button>
         <button id="shareBtn" class="btn-accent px-3 sm:px-4 py-2 text-sm flex items-center gap-1.5">
-          <span>🔗</span> <span class="hidden sm:inline">Share</span>
+          <span>🔗</span> <span class="hidden sm:inline" data-i18n="share">Share</span>
         </button>
         <button id="toggleHistoryBtn" class="btn-dark px-3 sm:px-4 py-2 text-sm flex items-center gap-1.5">
-          <span>📚</span> <span class="hidden sm:inline">History</span>
+          <span>📚</span> <span class="hidden sm:inline" data-i18n="history">History</span>
         </button>
       </div>
     </header>
@@ -249,20 +254,20 @@
       <section class="card rounded-3xl p-4 sm:p-7">
         <div class="flex items-center gap-2 mb-5">
           <span class="text-xl">⚙️</span>
-          <h2 class="text-lg font-bold" style="color: var(--sage-900);">Customize</h2>
+          <h2 class="text-lg font-bold" style="color: var(--sage-900);" data-i18n="customize">Customize</h2>
         </div>
 
         <form id="qrForm" class="space-y-5">
 
           <div>
             <label class="block text-sm font-semibold mb-2" style="color: var(--sage-700);">
-              🔗 URL
+              🔗 <span data-i18n="urlLabel">URL</span>
             </label>
             <div class="flex gap-2">
               <input id="urlInput" type="text" required
                      placeholder="https://youtube.com/..."
                      class="field flex-1 text-sm" />
-              <button type="button" id="copyUrlBtn" class="btn-soft px-4 text-sm">
+              <button type="button" id="copyUrlBtn" class="btn-soft px-4 text-sm" data-i18n="copy">
                 Copy
               </button>
             </div>
@@ -271,13 +276,13 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold mb-2" style="color: var(--sage-700);">
-                🎨 Foreground
+                🎨 <span data-i18n="foreground">Foreground</span>
               </label>
               <input id="fgColor" type="color" value="#3F6340" class="w-full h-11" />
             </div>
             <div>
               <label class="block text-sm font-semibold mb-2" style="color: var(--sage-700);">
-                🪞 Background
+                🪞 <span data-i18n="background">Background</span>
               </label>
               <input id="bgColor" type="color" value="#FBF8F0" class="w-full h-11" />
             </div>
@@ -286,17 +291,17 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-semibold mb-2" style="color: var(--sage-700);">
-                📏 Size
+                📏 <span data-i18n="sizeLabel">Size</span>
               </label>
               <select id="sizeSelect" class="field w-full text-sm">
-                <option value="200">Small (200px)</option>
-                <option value="300" selected>Medium (300px)</option>
-                <option value="500">Large (500px)</option>
+                <option value="200" data-i18n="sizeSmall">Small (200px)</option>
+                <option value="300" selected data-i18n="sizeMedium">Medium (300px)</option>
+                <option value="500" data-i18n="sizeLarge">Large (500px)</option>
               </select>
             </div>
             <div>
               <label class="block text-sm font-semibold mb-2" style="color: var(--sage-700);">
-                🛡️ Error Correction
+                🛡️ <span data-i18n="ecLabel">Error Correction</span>
               </label>
               <select id="ecSelect" class="field w-full text-sm">
                 <option value="L">L (~7%)</option>
@@ -309,7 +314,7 @@
 
           <div>
             <label class="block text-sm font-semibold mb-2" style="color: var(--sage-700);">
-              🖼️ Logo (optional)
+              🖼️ <span data-i18n="logoLabel">Logo (optional)</span>
             </label>
             <div class="flex items-center gap-2">
               <input id="logoInput" type="file" accept="image/*"
@@ -319,19 +324,19 @@
                             file:cursor-pointer
                             file:bg-[#DCE8D3] file:text-[#3F6340]
                             hover:file:bg-[#C8DBBE]" />
-              <button type="button" id="clearLogoBtn" class="btn-soft px-4 text-sm">
+              <button type="button" id="clearLogoBtn" class="btn-soft px-4 text-sm" data-i18n="clear">
                 Clear
               </button>
             </div>
-            <p class="text-xs mt-1.5" style="color: var(--sage-700); opacity: 0.7;">
+            <p class="text-xs mt-1.5" style="color: var(--sage-700); opacity: 0.7;" data-i18n="logoHint">
               💡 Adding a logo auto-sets error correction to H for scannability.
             </p>
           </div>
 
           <div>
             <label class="flex items-center flex-wrap text-sm font-semibold mb-2" style="color: var(--sage-700);">
-              <span>✨ Or pick a cute sticker</span>
-              <span id="stickerActive" class="tag ml-2 hidden">● selected</span>
+              <span data-i18n="stickerLabel">✨ Or pick a cute sticker</span>
+              <span id="stickerActive" class="tag ml-2 hidden" data-i18n="selected">● selected</span>
             </label>
             <div id="stickerTabs"
                  class="flex gap-1.5 overflow-x-auto pb-2 mb-2 -mx-1 px-1"
@@ -341,7 +346,7 @@
                  class="grid grid-cols-8 sm:grid-cols-10 gap-1.5 p-3 rounded-2xl max-h-52 overflow-y-auto"
                  style="background: var(--cream-50); border: 1.5px solid var(--cream-200);">
             </div>
-            <p class="text-xs mt-1.5" style="color: var(--sage-700); opacity: 0.7;">
+            <p class="text-xs mt-1.5" style="color: var(--sage-700); opacity: 0.7;" data-i18n="stickerHint">
               Pick a category → tap a sticker · tap again to deselect.
             </p>
           </div>
@@ -349,7 +354,7 @@
           <button id="generateBtn" type="submit"
                   class="btn-primary w-full flex items-center justify-center gap-2 py-3 text-base">
             <span id="genSpinner" class="spinner hidden"></span>
-            <span id="genLabel">✨ Generate QR</span>
+            <span id="genLabel" data-i18n="generateBtn">✨ Generate QR</span>
           </button>
 
         </form>
@@ -359,25 +364,25 @@
       <section class="card rounded-3xl p-4 sm:p-7 flex flex-col">
         <div class="flex items-center gap-2 mb-4 sm:mb-5">
           <span class="text-xl">👀</span>
-          <h2 class="text-lg font-bold" style="color: var(--sage-900);">Preview</h2>
+          <h2 class="text-lg font-bold" style="color: var(--sage-900);" data-i18n="previewTitle">Preview</h2>
         </div>
         <div id="previewBox"
              class="flex-1 flex items-center justify-center rounded-2xl min-h-[240px] sm:min-h-[280px] p-4 sm:p-5 relative overflow-hidden"
              style="background: linear-gradient(135deg, #FBF8F0, #EEF4EA); border: 1.5px dashed var(--sage-300);">
           <div id="placeholderText" class="text-center" style="color: var(--sage-700); opacity: 0.6;">
             <div class="text-5xl mb-3 float-anim">🌱</div>
-            <p class="text-sm font-medium">Your QR will bloom here</p>
+            <p class="text-sm font-medium" data-i18n="previewPlaceholder">Your QR will bloom here</p>
           </div>
           <canvas id="qrCanvas" class="hidden max-w-full rounded-xl" style="box-shadow: 0 8px 24px rgba(84,127,80,0.15);"></canvas>
         </div>
         <div class="mt-4 sm:mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2">
           <button id="downloadBtn" disabled
                   class="btn-accent w-full py-3 text-base flex items-center justify-center gap-2">
-            <span>⬇️</span> Download
+            <span>⬇️</span> <span data-i18n="download">Download</span>
           </button>
           <button id="shareImgBtn" disabled
                   class="btn-primary w-full py-3 text-base flex items-center justify-center gap-2">
-            <span>📤</span> Share QR
+            <span>📤</span> <span data-i18n="shareQr">Share QR</span>
           </button>
         </div>
       </section>
@@ -389,14 +394,14 @@
       <div class="flex items-center justify-between mb-5">
         <div class="flex items-center gap-2">
           <span class="text-xl">📚</span>
-          <h2 class="text-lg font-bold" style="color: var(--sage-900);">History</h2>
+          <h2 class="text-lg font-bold" style="color: var(--sage-900);" data-i18n="historyTitle">History</h2>
         </div>
         <button id="clearAllBtn"
                 class="px-4 py-2 rounded-xl text-sm font-medium transition"
                 style="background: #FCE4DC; color: #B45A3F;"
                 onmouseover="this.style.background='#F8D2C5'"
                 onmouseout="this.style.background='#FCE4DC'">
-          🗑️ Clear All
+          🗑️ <span data-i18n="clearAll">Clear All</span>
         </button>
       </div>
       <div id="historyGrid"
@@ -404,7 +409,7 @@
       </div>
       <div id="historyEmpty" class="hidden text-center py-10" style="color: var(--sage-700); opacity: 0.6;">
         <div class="text-4xl mb-2">🍃</div>
-        <p class="text-sm">No QR codes yet — create your first one above!</p>
+        <p class="text-sm" data-i18n="historyEmpty">No QR codes yet — create your first one above!</p>
       </div>
     </section>
 
@@ -428,9 +433,9 @@
 
       <div class="flex items-center gap-2 mb-2">
         <span class="text-2xl">🔗</span>
-        <h3 class="text-xl font-bold" style="color: var(--sage-900);">Share this Generator</h3>
+        <h3 class="text-xl font-bold" style="color: var(--sage-900);" data-i18n="shareModalTitle">Share this Generator</h3>
       </div>
-      <p class="text-sm mb-5" style="color: var(--sage-700); opacity: 0.8;">
+      <p class="text-sm mb-5" style="color: var(--sage-700); opacity: 0.8;" data-i18n="shareModalSubtitle">
         It's a single HTML file — share it however you like ✨
       </p>
 
@@ -438,30 +443,29 @@
 
         <div class="rounded-2xl p-4" style="background: white; border: 1.5px solid var(--sage-100);">
           <p class="font-bold text-sm flex items-center gap-1.5" style="color: var(--sage-900);">
-            <span>📁</span> Option 1: Send the file directly
+            <span>📁</span> <span data-i18n="shareOpt1Title">Option 1: Send the file directly</span>
           </p>
-          <p class="text-xs mt-1.5" style="color: var(--sage-700);">
-            Send <code class="px-1.5 py-0.5 rounded text-[11px]" style="background: var(--cream-100);">qr-generator.html</code>
-            via email / LINE / Messenger. Double-click to open.
+          <p class="text-xs mt-1.5" style="color: var(--sage-700);" data-i18n="shareOpt1Desc">
+            Send qr-generator.html via email / LINE / Messenger. Double-click to open.
           </p>
           <button id="downloadHtmlBtn" class="btn-dark mt-3 px-4 py-2 text-xs">
-            ⬇️ Download HTML file
+            ⬇️ <span data-i18n="downloadHtmlBtn">Download HTML file</span>
           </button>
         </div>
 
         <div class="rounded-2xl p-4" style="background: white; border: 1.5px solid var(--sage-100);">
           <p class="font-bold text-sm flex items-center gap-1.5" style="color: var(--sage-900);">
-            <span>🌐</span> Option 2: Host online → get a link
+            <span>🌐</span> <span data-i18n="shareOpt2Title">Option 2: Host online → get a link</span>
           </p>
-          <p class="text-xs mt-1.5" style="color: var(--sage-700);">
+          <p class="text-xs mt-1.5" style="color: var(--sage-700);" data-i18n="shareOpt2Desc">
             Drag the HTML to one of these free hosts to get a public URL:
           </p>
           <ul class="text-xs mt-2 space-y-1.5 pl-5 list-disc" style="color: var(--sage-900);">
             <li><b>Netlify Drop</b> —
               <a href="https://app.netlify.com/drop" target="_blank" class="font-medium underline" style="color: var(--sage-600);">app.netlify.com/drop</a>
-              <span style="color: var(--sage-700); opacity: 0.7;">(drag-drop, instant, no signup)</span>
+              <span style="color: var(--sage-700); opacity: 0.7;" data-i18n="netlifyNote">(drag-drop, instant, no signup)</span>
             </li>
-            <li><b>GitHub Pages</b> — push to a repo, enable Pages</li>
+            <li><b>GitHub Pages</b> — <span data-i18n="githubNote">push to a repo, enable Pages</span></li>
             <li><b>Vercel</b> —
               <a href="https://vercel.com" target="_blank" class="font-medium underline" style="color: var(--sage-600);">vercel.com</a>
             </li>
@@ -470,14 +474,14 @@
 
         <div class="rounded-2xl p-4" style="background: white; border: 1.5px solid var(--sage-100);">
           <p class="font-bold text-sm flex items-center gap-1.5" style="color: var(--sage-900);">
-            <span>📋</span> Option 3: Copy current page link
+            <span>📋</span> <span data-i18n="shareOpt3Title">Option 3: Copy current page link</span>
           </p>
-          <p class="text-xs mt-1.5" style="color: var(--sage-700);">
+          <p class="text-xs mt-1.5" style="color: var(--sage-700);" data-i18n="shareOpt3Desc">
             If this page is already at a URL, copy it here:
           </p>
           <div class="flex gap-2 mt-2.5">
             <input id="shareUrlInput" readonly class="field flex-1 text-xs" />
-            <button id="copyShareUrlBtn" class="btn-primary px-4 py-2 text-xs">
+            <button id="copyShareUrlBtn" class="btn-primary px-4 py-2 text-xs" data-i18n="copy">
               Copy
             </button>
           </div>
@@ -488,6 +492,133 @@
   </div>
 
 <script>
+  // ============= i18n =============
+  const I18N = {
+    en: {
+      share: 'Share', history: 'History',
+      appTitle: 'QR Code Generator',
+      tagline: 'Cozy · Offline · No installation needed ✨',
+      customize: 'Customize',
+      urlLabel: 'URL', copy: 'Copy',
+      foreground: 'Foreground', background: 'Background',
+      sizeLabel: 'Size', sizeSmall: 'Small (200px)', sizeMedium: 'Medium (300px)', sizeLarge: 'Large (500px)',
+      ecLabel: 'Error Correction',
+      logoLabel: 'Logo (optional)', clear: 'Clear',
+      logoHint: '💡 Adding a logo auto-sets error correction to H for scannability.',
+      stickerLabel: '✨ Or pick a cute sticker',
+      selected: '● selected',
+      stickerHint: 'Pick a category → tap a sticker · tap again to deselect.',
+      generateBtn: '✨ Generate QR',
+      generating: 'Generating...',
+      previewTitle: 'Preview',
+      previewPlaceholder: 'Your QR will bloom here',
+      download: 'Download', shareQr: 'Share QR',
+      historyTitle: 'History', clearAll: 'Clear All',
+      historyEmpty: 'No QR codes yet — create your first one above!',
+      shareModalTitle: 'Share this Generator',
+      shareModalSubtitle: "It's a single HTML file — share it however you like ✨",
+      shareOpt1Title: 'Option 1: Send the file directly',
+      shareOpt1Desc: 'Send qr-generator.html via email / LINE / Messenger. Double-click to open.',
+      downloadHtmlBtn: 'Download HTML file',
+      shareOpt2Title: 'Option 2: Host online → get a link',
+      shareOpt2Desc: 'Drag the HTML to one of these free hosts to get a public URL:',
+      netlifyNote: '(drag-drop, instant, no signup)',
+      githubNote: 'push to a repo, enable Pages',
+      shareOpt3Title: 'Option 3: Copy current page link',
+      shareOpt3Desc: 'If this page is already at a URL, copy it here:',
+      // toasts
+      tQrGenerated: 'QR generated', tDownloaded: 'Downloaded',
+      tUrlCopied: 'URL copied', tNothingCopy: 'Nothing to copy', tCopyFailed: 'Copy failed',
+      tHistoryCleared: 'History cleared', tDeleted: 'Deleted',
+      tSettingsLoaded: 'Settings loaded — click Generate',
+      tHtmlDownloaded: 'HTML file downloaded', tDownloadFailed: 'Download failed',
+      tLinkCopied: 'Link copied', tShared: 'Shared',
+      tShareUnsupported: 'URL copied (sharing not supported)',
+      tShareFailed: 'Share failed', tGenFailed: 'Generation failed',
+      tStorageFull: 'Storage full — old items kept',
+      confirmClear: 'Clear all history?',
+      // categories
+      catFaces: '😀 Faces', catAnimals: '🐶 Animals', catHearts: '❤️ Hearts',
+      catNature: '🌸 Nature', catFood: '🍔 Food', catActivity: '⚽ Activity',
+      catTravel: '🚀 Travel', catTech: '📱 Tech', catSymbol: '✨ Symbols', catObjects: '🎁 Objects',
+    },
+    th: {
+      share: 'แชร์', history: 'ประวัติ',
+      appTitle: 'สร้าง QR Code',
+      tagline: 'ใช้ง่าย · ออฟไลน์ · ไม่ต้องติดตั้ง ✨',
+      customize: 'ปรับแต่ง',
+      urlLabel: 'ลิงก์ URL', copy: 'คัดลอก',
+      foreground: 'สีจุด', background: 'สีพื้น',
+      sizeLabel: 'ขนาด', sizeSmall: 'เล็ก (200px)', sizeMedium: 'กลาง (300px)', sizeLarge: 'ใหญ่ (500px)',
+      ecLabel: 'ระดับการแก้ข้อผิดพลาด',
+      logoLabel: 'โลโก้ (ไม่บังคับ)', clear: 'ล้าง',
+      logoHint: '💡 เมื่อใส่โลโก้ ระบบจะตั้ง Error Correction เป็น H ให้อัตโนมัติเพื่อให้สแกนได้',
+      stickerLabel: '✨ หรือเลือกสติกเกอร์น่ารัก',
+      selected: '● เลือกแล้ว',
+      stickerHint: 'เลือกหมวด → แตะสติกเกอร์ · แตะอีกครั้งเพื่อยกเลิก',
+      generateBtn: '✨ สร้าง QR',
+      generating: 'กำลังสร้าง...',
+      previewTitle: 'ตัวอย่าง',
+      previewPlaceholder: 'QR ของคุณจะปรากฏที่นี่',
+      download: 'ดาวน์โหลด', shareQr: 'แชร์ QR',
+      historyTitle: 'ประวัติ', clearAll: 'ลบทั้งหมด',
+      historyEmpty: 'ยังไม่มี QR · สร้างอันแรกได้เลย!',
+      shareModalTitle: 'แชร์เครื่องมือนี้',
+      shareModalSubtitle: 'เป็นไฟล์ HTML ไฟล์เดียว แชร์ได้ตามชอบ ✨',
+      shareOpt1Title: 'วิธีที่ 1: ส่งไฟล์โดยตรง',
+      shareOpt1Desc: 'ส่งไฟล์ qr-generator.html ทางอีเมล / LINE / Messenger ดับเบิ้ลคลิกเพื่อเปิด',
+      downloadHtmlBtn: 'ดาวน์โหลดไฟล์ HTML',
+      shareOpt2Title: 'วิธีที่ 2: โฮสต์ออนไลน์ → ได้ลิงก์',
+      shareOpt2Desc: 'ลากไฟล์ HTML ไปวางในบริการฟรีเหล่านี้ จะได้ URL สาธารณะ:',
+      netlifyNote: '(ลาก-วาง ได้ทันที ไม่ต้องสมัคร)',
+      githubNote: 'อัปขึ้น repo แล้วเปิด Pages',
+      shareOpt3Title: 'วิธีที่ 3: คัดลอกลิงก์หน้านี้',
+      shareOpt3Desc: 'ถ้าหน้านี้มี URL อยู่แล้ว คัดลอกได้ที่นี่:',
+      // toasts
+      tQrGenerated: 'สร้าง QR แล้ว', tDownloaded: 'ดาวน์โหลดแล้ว',
+      tUrlCopied: 'คัดลอกลิงก์แล้ว', tNothingCopy: 'ไม่มีอะไรให้คัดลอก', tCopyFailed: 'คัดลอกไม่สำเร็จ',
+      tHistoryCleared: 'ล้างประวัติแล้ว', tDeleted: 'ลบแล้ว',
+      tSettingsLoaded: 'โหลดการตั้งค่าแล้ว · กดสร้าง QR',
+      tHtmlDownloaded: 'ดาวน์โหลดไฟล์ HTML แล้ว', tDownloadFailed: 'ดาวน์โหลดไม่สำเร็จ',
+      tLinkCopied: 'คัดลอกลิงก์แล้ว', tShared: 'แชร์แล้ว',
+      tShareUnsupported: 'คัดลอกลิงก์แล้ว (เบราว์เซอร์ไม่รองรับการแชร์)',
+      tShareFailed: 'แชร์ไม่สำเร็จ', tGenFailed: 'สร้างไม่สำเร็จ',
+      tStorageFull: 'พื้นที่เต็ม · เก็บของเก่าไว้',
+      confirmClear: 'ล้างประวัติทั้งหมด?',
+      // categories
+      catFaces: '😀 หน้ายิ้ม', catAnimals: '🐶 สัตว์', catHearts: '❤️ หัวใจ',
+      catNature: '🌸 ธรรมชาติ', catFood: '🍔 อาหาร', catActivity: '⚽ กิจกรรม',
+      catTravel: '🚀 ท่องเที่ยว', catTech: '📱 เทคโนโลยี', catSymbol: '✨ สัญลักษณ์', catObjects: '🎁 สิ่งของ',
+    }
+  };
+
+  let currentLang = localStorage.getItem('qr_lang') || 'th';
+  function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || I18N.en[key] || key; }
+
+  function applyLang() {
+    document.documentElement.lang = currentLang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      el.textContent = t(key);
+    });
+    // Lang toggle button label
+    const lbl = document.getElementById('langLabel');
+    if (lbl) lbl.textContent = currentLang === 'th' ? 'EN' : 'TH';
+    // Generate button (depends on loading state)
+    if (typeof setLoading === 'function') setLoading(false);
+    // Re-render sticker tabs/grid for category labels
+    if (typeof updateTabs === 'function') updateTabs();
+    // Update URL placeholder
+    const urlIn = document.getElementById('urlInput');
+    if (urlIn) urlIn.placeholder = currentLang === 'th' ? 'https://example.com/...' : 'https://youtube.com/...';
+  }
+
+  function setLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('qr_lang', lang);
+    applyLang();
+  }
+
   // ------------- DOM -------------
   const form              = document.getElementById('qrForm');
   const urlInput          = document.getElementById('urlInput');
@@ -519,43 +650,43 @@
   // ------------- Sticker library (categorized) -------------
   const STICKER_CATEGORIES = [
     {
-      key: 'faces', label: '😀 Faces',
+      key: 'faces', labelKey: 'catFaces',
       items: ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','😚','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','😐','😑','😶','😏','😒','🙄','😬','😌','😔','😪','🤤','😴','🥱','😷','🤒','🤕','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','🥸','😎','🤓','🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','👾','🤖']
     },
     {
-      key: 'animals', label: '🐶 Animals',
+      key: 'animals', labelKey: 'catAnimals',
       items: ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐽','🐸','🐵','🙈','🙉','🙊','🐒','🐔','🐧','🐦','🐤','🐣','🐥','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷️','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊️','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿️','🦔']
     },
     {
-      key: 'hearts', label: '❤️ Hearts',
+      key: 'hearts', labelKey: 'catHearts',
       items: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','♥️','💌','💋','👄','💯']
     },
     {
-      key: 'nature', label: '🌸 Nature',
+      key: 'nature', labelKey: 'catNature',
       items: ['⭐','🌟','✨','💫','⚡','☄️','🔥','💥','🌈','☀️','🌤️','⛅','🌥️','☁️','🌦️','🌧️','⛈️','🌩️','🌨️','❄️','☃️','⛄','🌬️','💨','💧','💦','☔','🌊','🌙','🌛','🌜','🌚','🌝','🌞','🪐','🌍','🌎','🌏','🌸','💮','🏵️','🌹','🥀','🌺','🌻','🌼','🌷','🌱','🪴','🌲','🌳','🌴','🌵','🌾','🌿','☘️','🍀','🍁','🍂','🍃','🍄']
     },
     {
-      key: 'food', label: '🍔 Food',
+      key: 'food', labelKey: 'catFood',
       items: ['🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🥦','🥬','🥒','🌶️','🫑','🌽','🥕','🫒','🧄','🧅','🥔','🍠','🥐','🥯','🍞','🥖','🥨','🧀','🥚','🍳','🧈','🥞','🧇','🥓','🥩','🍗','🍖','🌭','🍔','🍟','🍕','🥪','🥙','🧆','🌮','🌯','🥗','🥘','🫕','🥫','🍝','🍜','🍲','🍛','🍣','🍱','🥟','🦪','🍤','🍙','🍚','🍘','🍥','🥠','🥮','🍢','🍡','🍧','🍨','🍦','🥧','🧁','🍰','🎂','🍮','🍭','🍬','🍫','🍿','🍩','🍪','🌰','🥜','🍯','🥛','🍼','☕','🍵','🧃','🥤','🧋','🍶','🍺','🍻','🥂','🍷','🥃','🍸','🍹','🧉','🍾']
     },
     {
-      key: 'activity', label: '⚽ Activity',
+      key: 'activity', labelKey: 'catActivity',
       items: ['⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱','🪀','🏓','🏸','🏒','🏑','🥍','🏏','🪃','🥅','⛳','🪁','🏹','🎣','🤿','🥊','🥋','🎽','🛹','🛼','🛷','⛸️','🥌','🎿','⛷️','🏂','🪂','🏋️','🤼','🤸','⛹️','🤺','🏇','🧘','🏄','🏊','🤽','🚣','🧗','🚵','🚴','🏆','🥇','🥈','🥉','🏅','🎖️','🏵️','🎗️','🎫','🎟️','🎪','🤹','🎭','🩰','🎨','🎬','🎤','🎧','🎼','🎹','🥁','🎷','🎺','🎸','🪕','🎻','🎲','♟️','🎯','🎳','🎮','🎰','🧩']
     },
     {
-      key: 'travel', label: '🚀 Travel',
+      key: 'travel', labelKey: 'catTravel',
       items: ['🚗','🚕','🚙','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🛻','🚚','🚛','🚜','🛵','🏍️','🛺','🚲','🛴','🛹','🛼','🚏','🛣️','🛤️','🛢️','⛽','🚨','🚥','🚦','🛑','🚧','⚓','⛵','🛶','🚤','🛳️','⛴️','🛥️','🚢','✈️','🛩️','🛫','🛬','🪂','💺','🚁','🚟','🚠','🚡','🛰️','🚀','🛸','🛎️','🧳','⌛','⏳','⌚','⏰','⏱️','🕰️','🌎','🗺️','🏔️','⛰️','🌋','🗻','🏕️','🏖️','🏜️','🏝️','🏟️','🏛️','🏗️','🪧','🏘️','🏚️','🏠','🏡','🏢','🏣','🏤','🏥','🏦','🏨','🏩','🏪','🏫','🏬','🏭','🏯','🏰','💒','🗼','🗽','⛪','🕌','🛕','🕍','⛩️','🕋','⛲','⛺','🌁','🌃','🏙️','🌄','🌅','🌆','🌇','🌉']
     },
     {
-      key: 'tech', label: '📱 Tech',
+      key: 'tech', labelKey: 'catTech',
       items: ['⌚','📱','📲','💻','⌨️','🖥️','🖨️','🖱️','🖲️','🕹️','🗜️','💽','💾','💿','📀','📼','📷','📸','📹','🎥','📽️','🎞️','📞','☎️','📟','📠','📺','📻','🎙️','🎚️','🎛️','🧭','⏱️','⏲️','⏰','🕰️','⌛','⏳','📡','🔋','🔌','💡','🔦','🕯️','🪔','🧯','🛢️','💸','💵','💴','💶','💷','🪙','💰','💳','💎','⚖️','🪜','🧰','🪛','🔧','🔨','⚒️','🛠️','⛏️','🪚','🔩','⚙️','🪤','🧱','⛓️','🧲','🔫','💣','🧨','🪓','🔪','🗡️','⚔️','🛡️','🚬','⚰️','🪦','⚱️','🏺','🔮','📿','🧿','💈','⚗️','🔭','🔬','🕳️','🩹','🩺','💊','💉','🩸','🧬','🦠','🧫','🧪','🌡️']
     },
     {
-      key: 'symbol', label: '✨ Symbols',
+      key: 'symbol', labelKey: 'catSymbol',
       items: ['👍','👎','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👋','🤚','🖐️','✋','🖖','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦵','🦿','🦶','👂','🦻','👃','🧠','🫀','🫁','🦷','🦴','👀','👁️','👅','👄','💯','💢','💥','💫','💦','💨','🕳️','💣','💬','👁️‍🗨️','🗨️','🗯️','💭','💤','🆗','🆕','🆒','🆓','🆙','🆚','🈁','🈯','🈳','🈵','🈲','🉐','🉑','㊗️','㊙️','🈘','🈚','🈸','🈴','🈺','🅰️','🅱️','🆎','🆑','🅾️','🆘','❌','⭕','🛑','⛔','📛','🚫','💢','♨️','🚷','🚯','🚳','🚱','🔞','📵','🚭','✅','🈯','💹','❇️','✳️','❎','🌐','💠','Ⓜ️','🌀','💤','🏧','🚾','♿','🅿️','🛗','🈳','🈂️','🛂','🛃','🛄','🛅','🚹','🚺','🚼','⚧','🚻','🚮','🎦','📶','🈁','🔣','ℹ️','🔤','🔡','🔠','🆎','🆑','🆒','🆓','🆕','🆖','🆗','🆘','🆙','🆚','🈁','🈂️','🈷️','🈶','🈯','🉐','🈹','🈚','🈲','🉑','🈸','🈴','🈳','㊗️','㊙️','🈺','🈵','▶️','⏸️','⏯️','⏹️','⏺️','⏭️','⏮️','⏩','⏪','⏫','⏬','◀️','🔼','🔽','➡️','⬅️','⬆️','⬇️','↗️','↘️','↙️','↖️','↕️','↔️','↪️','↩️','⤴️','⤵️','🔀','🔁','🔂','🔄','🔃','🎵','🎶','➕','➖','➗','✖️','♾️','💲','💱','™️','©️','®️','〰️','➰','➿','🔚','🔙','🔛','🔝','🔜']
     },
     {
-      key: 'objects', label: '🎁 Objects',
+      key: 'objects', labelKey: 'catObjects',
       items: ['🎁','🎀','🎈','🎉','🎊','🪅','🪆','🧧','✨','🎇','🎆','🧨','🪔','🕯️','🪞','🪟','🛏️','🛋️','🪑','🚽','🪠','🚿','🛁','🪒','🧴','🧷','🧹','🧺','🧻','🪣','🧼','🪥','🧽','🪦','🛒','🏷️','💌','📩','📨','📧','💼','📁','📂','🗂️','📅','📆','🗒️','🗓️','📇','📈','📉','📊','📋','📌','📍','📎','🖇️','📏','📐','✂️','🗃️','🗄️','🗑️','🔒','🔓','🔏','🔐','🔑','🗝️','🔨','🪓','⛏️','⚒️','🛠️','🗡️','⚔️','🔫','🪃','🏹','🛡️','🪚','🔧','🪛','🔩','⚙️','🗜️','⚖️','🦯','🔗','⛓️','🪝','🧰','🧲','🪜','⚗️','🧪','🧫','🧬','🔬','🔭','📡','💉','🩸','💊','🩹','🩺','🚪','🪞','🪟','🛏️','🛋️','🪑','🚽','🪠','🚿','🛁','🪤','🪒','🧴','🧷','🧹','🧺','🧻','🪣','🧼','🪥','🧽','🧯','🛒','🚬','⚰️','🪦','⚱️','🗿','🪧','🪪','👑','💎','💍','💄','💋','👑']
     }
   ];
@@ -572,7 +703,8 @@
       const tab = document.createElement('button');
       tab.type = 'button';
       tab.dataset.cat = cat.key;
-      tab.textContent = cat.label;
+      tab.dataset.labelKey = cat.labelKey;
+      tab.textContent = t(cat.labelKey);
       tab.className = 'sticker-tab whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-semibold transition';
       tab.addEventListener('click', () => {
         currentCategory = cat.key;
@@ -586,11 +718,13 @@
   }
 
   function updateTabs() {
-    document.querySelectorAll('.sticker-tab').forEach(t => {
-      if (t.dataset.cat === currentCategory) {
-        t.style.cssText = 'background: var(--sage-600); color: white;';
+    document.querySelectorAll('.sticker-tab').forEach(tab => {
+      // Update label text on lang change
+      if (tab.dataset.labelKey) tab.textContent = t(tab.dataset.labelKey);
+      if (tab.dataset.cat === currentCategory) {
+        tab.style.cssText = 'background: var(--sage-600); color: white;';
       } else {
-        t.style.cssText = 'background: var(--cream-100); color: var(--sage-700);';
+        tab.style.cssText = 'background: var(--cream-100); color: var(--sage-700);';
       }
     });
   }
@@ -664,9 +798,10 @@
   }
 
   function setLoading(loading) {
+    if (!generateBtn) return;
     generateBtn.disabled = loading;
     genSpinner.classList.toggle('hidden', !loading);
-    genLabel.textContent = loading ? 'Generating...' : '✨ Generate QR';
+    genLabel.textContent = loading ? t('generating') : t('generateBtn');
   }
 
   // ------------- QR drawing -------------
@@ -804,7 +939,7 @@
         created_at: new Date().toISOString(),
       });
 
-      toast('QR generated');
+      toast(t('tQrGenerated'));
       renderHistory();
       // On mobile (stacked layout), scroll preview into view
       if (window.innerWidth < 1024) {
@@ -812,7 +947,7 @@
       }
     } catch (err) {
       console.error(err);
-      toast(err.message || 'Generation failed', 'error');
+      toast(err.message || t('tGenFailed'), 'error');
     } finally {
       setLoading(false);
     }
@@ -827,7 +962,7 @@
     document.body.appendChild(a);
     a.click();
     a.remove();
-    toast('Downloaded');
+    toast(t('tDownloaded'));
   });
 
   // ------------- Native share (mobile) -------------
@@ -848,15 +983,15 @@
           title: 'My QR Code',
           text: currentUrl,
         });
-        toast('Shared');
+        toast(t('tShared'));
         return;
       }
       // Fallback: copy URL to clipboard
       await navigator.clipboard.writeText(currentUrl);
-      toast('URL copied (sharing not supported)', 'info');
+      toast(t('tShareUnsupported'), 'info');
     } catch (err) {
       if (err && err.name === 'AbortError') return; // user cancelled
-      toast('Share failed', 'error');
+      toast(t('tShareFailed'), 'error');
     }
   });
 
@@ -880,16 +1015,16 @@
   // ------------- Copy / clear -------------
   copyUrlBtn.addEventListener('click', async () => {
     const v = urlInput.value.trim();
-    if (!v) { toast('Nothing to copy', 'info'); return; }
+    if (!v) { toast(t('tNothingCopy'), 'info'); return; }
     try {
       await navigator.clipboard.writeText(v);
-      toast('URL copied');
+      toast(t('tUrlCopied'));
     } catch {
       // fallback for non-secure contexts
       const ta = document.createElement('textarea');
       ta.value = v; document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); toast('URL copied'); }
-      catch { toast('Copy failed', 'error'); }
+      try { document.execCommand('copy'); toast(t('tUrlCopied')); }
+      catch { toast(t('tCopyFailed'), 'error'); }
       ta.remove();
     }
   });
@@ -914,7 +1049,7 @@
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
     } catch (e) {
-      toast('Storage full — old items kept', 'error');
+      toast(t('tStorageFull'), 'error');
     }
   }
 
@@ -942,10 +1077,10 @@
   });
 
   clearAllBtn.addEventListener('click', () => {
-    if (!confirm('Clear all history?')) return;
+    if (!confirm(t('confirmClear'))) return;
     saveHistory([]);
     renderHistory();
-    toast('History cleared');
+    toast(t('tHistoryCleared'));
   });
 
   function renderHistory() {
@@ -983,7 +1118,7 @@
         const list = loadHistory().filter(x => x.id !== item.id);
         saveHistory(list);
         renderHistory();
-        toast('Deleted', 'info');
+        toast(t('tDeleted'), 'info');
       });
       historyGrid.appendChild(card);
     }
@@ -998,7 +1133,7 @@
     logoInput.value  = '';
     selectedSticker  = item.sticker || null;
     updateStickerSelection();
-    toast('Settings loaded — click Generate', 'info');
+    toast(t('tSettingsLoaded'), 'info');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -1028,11 +1163,11 @@
   copyShareUrlBtn.addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(shareUrlInput.value);
-      toast('Link copied');
+      toast(t('tLinkCopied'));
     } catch {
       shareUrlInput.select();
-      try { document.execCommand('copy'); toast('Link copied'); }
-      catch { toast('Copy failed', 'error'); }
+      try { document.execCommand('copy'); toast(t('tLinkCopied')); }
+      catch { toast(t('tCopyFailed'), 'error'); }
     }
   });
 
@@ -1048,14 +1183,20 @@
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-      toast('HTML file downloaded');
+      toast(t('tHtmlDownloaded'));
     } catch (e) {
-      toast('Download failed', 'error');
+      toast(t('tDownloadFailed'), 'error');
     }
+  });
+
+  // ------------- Language toggle -------------
+  document.getElementById('langToggleBtn').addEventListener('click', () => {
+    setLang(currentLang === 'th' ? 'en' : 'th');
   });
 
   // ------------- Init -------------
   initStickerGrid();
+  applyLang();
   renderHistory();
 </script>
 </body>
