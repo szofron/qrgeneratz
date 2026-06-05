@@ -846,9 +846,12 @@
     const size = canvas.width;
 
     // sizeRatio: 0.22 for logo (with frame), 0.16 for sticker (smaller)
-    // frame: true draws a bg pad behind it; false = transparent (sticker mode)
+    // frame:   'rect'    = bg rectangle pad behind it (for custom logos)
+    //          'outline' = white outline that follows the image's alpha shape (sticker)
+    //          'none'    = no frame at all
     const sizeRatio = opts.sizeRatio ?? 0.22;
-    const frame     = opts.frame ?? true;
+    const frame     = opts.frame ?? 'rect';
+    const outlineColor = opts.outlineColor ?? '#FFFFFF';
 
     const targetMax = Math.floor(size * sizeRatio);
     let lw = imgEl.naturalWidth;
@@ -857,7 +860,10 @@
     lw = Math.round(lw * scale);
     lh = Math.round(lh * scale);
 
-    if (frame) {
+    const lx = Math.floor((size - lw) / 2);
+    const ly = Math.floor((size - lh) / 2);
+
+    if (frame === 'rect') {
       const pad = Math.max(6, Math.floor(size * 0.02));
       const bw = lw + pad * 2;
       const bh = lh + pad * 2;
@@ -865,10 +871,39 @@
       const by = Math.floor((size - bh) / 2);
       ctx.fillStyle = bgColorHex;
       ctx.fillRect(bx, by, bw, bh);
+      ctx.drawImage(imgEl, lx, ly, lw, lh);
+      return;
     }
 
-    const lx = Math.floor((size - lw) / 2);
-    const ly = Math.floor((size - lh) / 2);
+    if (frame === 'outline') {
+      // Stroke width relative to sticker size — gives proper sticker feel
+      const strokeW = Math.max(3, Math.round(Math.min(lw, lh) * 0.08));
+
+      // Build a solid-colored silhouette of the image on an offscreen canvas
+      const off = document.createElement('canvas');
+      off.width  = lw + strokeW * 2;
+      off.height = lh + strokeW * 2;
+      const octx = off.getContext('2d');
+      octx.drawImage(imgEl, strokeW, strokeW, lw, lh);
+      octx.globalCompositeOperation = 'source-in';
+      octx.fillStyle = outlineColor;
+      octx.fillRect(0, 0, off.width, off.height);
+
+      // Stamp the silhouette around the target position in 24 directions
+      const dirs = 24;
+      for (let i = 0; i < dirs; i++) {
+        const angle = (i / dirs) * Math.PI * 2;
+        const dx = Math.cos(angle) * strokeW;
+        const dy = Math.sin(angle) * strokeW;
+        ctx.drawImage(off, lx - strokeW + dx, ly - strokeW + dy);
+      }
+
+      // Draw original emoji on top
+      ctx.drawImage(imgEl, lx, ly, lw, lh);
+      return;
+    }
+
+    // frame === 'none'
     ctx.drawImage(imgEl, lx, ly, lw, lh);
   }
 
@@ -911,11 +946,15 @@
 
       if (hasFileLogo) {
         const img = await loadImageFromFile(logoInput.files[0]);
-        drawLogoOnCanvas(qrCanvas, img, bgColor.value, { sizeRatio: 0.22, frame: true });
+        drawLogoOnCanvas(qrCanvas, img, bgColor.value, { sizeRatio: 0.22, frame: 'rect' });
       } else if (hasSticker) {
         const img = await renderEmojiToImage(selectedSticker, 256);
-        // Smaller + no frame for stickers
-        drawLogoOnCanvas(qrCanvas, img, bgColor.value, { sizeRatio: 0.16, frame: false });
+        // Smaller + white outline that follows the sticker shape
+        drawLogoOnCanvas(qrCanvas, img, bgColor.value, {
+          sizeRatio: 0.18,
+          frame: 'outline',
+          outlineColor: '#FFFFFF',
+        });
       }
 
       qrCanvas.classList.remove('hidden');
