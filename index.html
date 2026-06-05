@@ -2,8 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QR Code Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#547F50" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="QR Generator" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23DCE8D3'/><text x='50' y='72' font-size='65' text-anchor='middle'>🌿</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23DCE8D3'/><text x='50' y='72' font-size='65' text-anchor='middle'>🌿</text></svg>" />
+  <title>QR Code Generator 🌿</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
   <style>
@@ -21,11 +28,26 @@
       --peach:     #F4C9A8;
       --peach-dk:  #D89773;
     }
+    * { -webkit-tap-highlight-color: transparent; }
+    html { -webkit-text-size-adjust: 100%; }
     body {
       background: linear-gradient(135deg, #FBF8F0 0%, #F0EAD8 50%, #E8E9D6 100%);
       background-attachment: fixed;
       color: var(--sage-900);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Plus Jakarta Sans", "Nunito", sans-serif;
+      /* Safe-area padding for notched phones */
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+      overscroll-behavior-y: contain;
+    }
+    /* Touch-friendly inputs: 16px+ prevents iOS auto-zoom on focus */
+    input, select, textarea, button { font-size: 16px; }
+    /* Larger tap targets on mobile */
+    @media (max-width: 640px) {
+      button, .sticker-btn { min-height: 44px; }
+      .sticker-btn { min-height: 40px; }
     }
     .spinner {
       border: 3px solid rgba(255,255,255,0.3);
@@ -167,6 +189,18 @@
       z-index: -1;
       pointer-events: none;
     }
+    @media (max-width: 640px) {
+      .blob { filter: blur(50px); opacity: 0.3; }
+    }
+    /* Larger color inputs on mobile */
+    input[type="color"] { height: 48px; min-height: 48px; }
+    /* Mobile sticker grid tweaks */
+    @media (max-width: 480px) {
+      #stickerGrid { grid-template-columns: repeat(7, minmax(0,1fr)); }
+      .sticker-btn { font-size: 22px; }
+    }
+    /* Modal scroll on small screens */
+    #shareModal > div { max-height: 92vh; overflow-y: auto; }
   </style>
 </head>
 <body class="min-h-screen">
@@ -175,9 +209,9 @@
   <div class="blob" style="width: 320px; height: 320px; background: #A8C29A; top: -80px; left: -80px;"></div>
   <div class="blob" style="width: 380px; height: 380px; background: #F4C9A8; bottom: -100px; right: -100px;"></div>
 
-  <div class="max-w-6xl mx-auto p-4 sm:p-6">
+  <div class="max-w-6xl mx-auto p-3 sm:p-6">
 
-    <header class="mb-8 flex items-center justify-between flex-wrap gap-3">
+    <header class="mb-5 sm:mb-8 flex items-center justify-between flex-wrap gap-3">
       <div class="flex items-center gap-3">
         <div class="float-anim w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
              style="background: linear-gradient(135deg, #DCE8D3, #F4C9A8); box-shadow: 0 4px 12px rgba(84,127,80,0.2);">
@@ -193,19 +227,19 @@
         </div>
       </div>
       <div class="flex gap-2">
-        <button id="shareBtn" class="btn-accent px-4 py-2 text-sm flex items-center gap-1.5">
-          <span>🔗</span> Share
+        <button id="shareBtn" class="btn-accent px-3 sm:px-4 py-2 text-sm flex items-center gap-1.5">
+          <span>🔗</span> <span class="hidden sm:inline">Share</span>
         </button>
-        <button id="toggleHistoryBtn" class="btn-dark px-4 py-2 text-sm flex items-center gap-1.5">
-          <span>📚</span> History
+        <button id="toggleHistoryBtn" class="btn-dark px-3 sm:px-4 py-2 text-sm flex items-center gap-1.5">
+          <span>📚</span> <span class="hidden sm:inline">History</span>
         </button>
       </div>
     </header>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
 
       <!-- LEFT: Form -->
-      <section class="card rounded-3xl p-6 sm:p-7">
+      <section class="card rounded-3xl p-4 sm:p-7">
         <div class="flex items-center gap-2 mb-5">
           <span class="text-xl">⚙️</span>
           <h2 class="text-lg font-bold" style="color: var(--sage-900);">Customize</h2>
@@ -311,13 +345,13 @@
       </section>
 
       <!-- RIGHT: Preview -->
-      <section class="card rounded-3xl p-6 sm:p-7 flex flex-col">
-        <div class="flex items-center gap-2 mb-5">
+      <section class="card rounded-3xl p-4 sm:p-7 flex flex-col">
+        <div class="flex items-center gap-2 mb-4 sm:mb-5">
           <span class="text-xl">👀</span>
           <h2 class="text-lg font-bold" style="color: var(--sage-900);">Preview</h2>
         </div>
         <div id="previewBox"
-             class="flex-1 flex items-center justify-center rounded-2xl min-h-[280px] p-5 relative overflow-hidden"
+             class="flex-1 flex items-center justify-center rounded-2xl min-h-[240px] sm:min-h-[280px] p-4 sm:p-5 relative overflow-hidden"
              style="background: linear-gradient(135deg, #FBF8F0, #EEF4EA); border: 1.5px dashed var(--sage-300);">
           <div id="placeholderText" class="text-center" style="color: var(--sage-700); opacity: 0.6;">
             <div class="text-5xl mb-3 float-anim">🌱</div>
@@ -325,16 +359,22 @@
           </div>
           <canvas id="qrCanvas" class="hidden max-w-full rounded-xl" style="box-shadow: 0 8px 24px rgba(84,127,80,0.15);"></canvas>
         </div>
-        <button id="downloadBtn" disabled
-                class="btn-accent mt-5 w-full py-3 text-base flex items-center justify-center gap-2">
-          <span>⬇️</span> Download PNG
-        </button>
+        <div class="mt-4 sm:mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <button id="downloadBtn" disabled
+                  class="btn-accent w-full py-3 text-base flex items-center justify-center gap-2">
+            <span>⬇️</span> Download
+          </button>
+          <button id="shareImgBtn" disabled
+                  class="btn-primary w-full py-3 text-base flex items-center justify-center gap-2">
+            <span>📤</span> Share QR
+          </button>
+        </div>
       </section>
 
     </div>
 
     <!-- HISTORY PANEL -->
-    <section id="historyPanel" class="card mt-6 rounded-3xl p-6 sm:p-7 hidden">
+    <section id="historyPanel" class="card mt-4 sm:mt-6 rounded-3xl p-4 sm:p-7 hidden">
       <div class="flex items-center justify-between mb-5">
         <div class="flex items-center gap-2">
           <span class="text-xl">📚</span>
@@ -453,6 +493,7 @@
   const qrCanvas          = document.getElementById('qrCanvas');
   const placeholderText   = document.getElementById('placeholderText');
   const downloadBtn       = document.getElementById('downloadBtn');
+  const shareImgBtn       = document.getElementById('shareImgBtn');
   const toggleHistoryBtn  = document.getElementById('toggleHistoryBtn');
   const historyPanel      = document.getElementById('historyPanel');
   const historyGrid       = document.getElementById('historyGrid');
@@ -659,6 +700,7 @@
       qrCanvas.classList.remove('hidden');
       placeholderText.classList.add('hidden');
       downloadBtn.disabled = false;
+      shareImgBtn.disabled = false;
 
       currentUrl = url;
       currentDataUrl = qrCanvas.toDataURL('image/png');
@@ -678,6 +720,10 @@
 
       toast('QR generated');
       renderHistory();
+      // On mobile (stacked layout), scroll preview into view
+      if (window.innerWidth < 1024) {
+        document.getElementById('previewBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     } catch (err) {
       console.error(err);
       toast(err.message || 'Generation failed', 'error');
@@ -696,6 +742,36 @@
     a.click();
     a.remove();
     toast('Downloaded');
+  });
+
+  // ------------- Native share (mobile) -------------
+  async function dataUrlToFile(dataUrl, filename) {
+    const res  = await fetch(dataUrl);
+    const blob = await res.blob();
+    return new File([blob], filename, { type: 'image/png' });
+  }
+
+  shareImgBtn.addEventListener('click', async () => {
+    if (!currentDataUrl) return;
+    const filename = `${domainFromUrl(currentUrl)}_${timestampStr()}.png`;
+    try {
+      const file = await dataUrlToFile(currentDataUrl, filename);
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'My QR Code',
+          text: currentUrl,
+        });
+        toast('Shared');
+        return;
+      }
+      // Fallback: copy URL to clipboard
+      await navigator.clipboard.writeText(currentUrl);
+      toast('URL copied (sharing not supported)', 'info');
+    } catch (err) {
+      if (err && err.name === 'AbortError') return; // user cancelled
+      toast('Share failed', 'error');
+    }
   });
 
   function domainFromUrl(u) {
